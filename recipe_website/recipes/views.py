@@ -24,10 +24,13 @@ def index(request):
     return render(request, 'home.html', context)
 
 
-def recipe(_, recipe=None):
+def recipe(request, recipe=None):
     link = 'pages/{recipe}.pdf'.format(recipe=recipe)
 
     with open(link, 'rb') as in_file:
         data = in_file.read()
 
-    return HttpResponse(data, content_type='application/pdf')
+    response = HttpResponse(data, content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename={recipe}.pdf'.format(recipe=recipe)
+
+    return response
