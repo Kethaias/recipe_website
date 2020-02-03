@@ -25,7 +25,7 @@ SECRET_KEY = '&wedc1ze@3_+tpc5d(2n(gqg^^j7&-mjwr7%_om)yvs3fq73si'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'kethaias.pythonanywhere.com']
 
 
 # Application definition
@@ -54,7 +54,7 @@ ROOT_URLCONF = 'recipe_website.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
