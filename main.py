@@ -1,10 +1,10 @@
-import comtypes.client
+import win32com.client
 from PyPDF4 import PdfFileReader, PdfFileWriter
 import os
 
 
 def PPTtoPDF(inputFileName, outputFileName, formatType = 32):
-    powerpoint = comtypes.client.CreateObject("Powerpoint.Application")
+    powerpoint = win32com.client.DispatchEx("Powerpoint.Application")
     powerpoint.Visible = 1
 
     if outputFileName[-3:] != 'pdf':
@@ -20,7 +20,7 @@ def PPTtoPDF(inputFileName, outputFileName, formatType = 32):
 
 
 if __name__ == '__main__':
-    input_path = 'input.pptx'
+    input_path = 'C:\\Users\\brand\\Documents\\Recipe Cards.pptx'
     output_path = 'output.pdf'
 
     PPTtoPDF(input_path, output_path)
