@@ -27,11 +27,7 @@ def make_context(subset=""):
         recipes=[
             Recipe(name=os.path.basename(r).split(".")[0], link=r) for r in recipes
         ],
-        subsets=[
-            os.path.basename(d).capitalize()
-            for d in glob.glob("pages/*")
-            if os.path.isdir(d)
-        ],
+        subsets=[os.path.basename(d) for d in glob.glob("pages/*") if os.path.isdir(d)],
     )
 
 
