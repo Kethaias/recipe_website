@@ -24,10 +24,13 @@ def make_context(subset=""):
         recipes += list(glob.glob("pages/*/*.png"))
 
     return dict(
-        recipes=[
-            Recipe(name=os.path.basename(r).split(".")[0], link=r) for r in recipes
-        ],
-        subsets=[os.path.basename(d) for d in glob.glob("pages/*") if os.path.isdir(d)],
+        recipes=sorted(
+            [Recipe(name=os.path.basename(r).split(".")[0], link=r) for r in recipes],
+            key=lambda r: r.name,
+        ),
+        subsets=sorted(
+            os.path.basename(d) for d in glob.glob("pages/*") if os.path.isdir(d)
+        ),
     )
 
 
