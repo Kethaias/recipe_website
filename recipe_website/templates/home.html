@@ -1,19 +1,16 @@
-{% include "nav.html" %}
-
 <center>
     <h1>Recipes</h1>
 
-    {% for tag in tags.all_by_recipe_count %}
-        <hr>
-        <h3>{{ tag }}</h3>
-        {% for recipe in tag.recipes.all %}
-            {% include "recipe_item.html" with recipe=recipe %}<br>
-        {% endfor %}
+    <hr>
+
+    <a href="/">All</a>
+    {% for subset in subsets %}
+         | <a href="/{{subset}}/">{{subset}}</a>
     {% endfor %}
 
     <hr>
-    <h3>Untagged</h3>
-    {% for recipe in recipes.all_untagged %}
-        {% include 'recipe_item.html' with recipe=recipe %}<br>
+  
+    {% for recipe in recipes %}
+        <a href="/recipe/{{recipe.name}}"><img src="/{{recipe.link}}", width="300", height="300"></a>
     {% endfor %}
 </center>

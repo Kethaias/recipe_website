@@ -16,20 +16,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, re_path
 
+from django.conf import settings  # --------> this
+from django.conf.urls.static import static  # --------> this
+
 from . import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    re_path(r'^recipe/(?P<recipe>\w+)/$', views.recipe, name='recipe'),
-    path(r'recipe_manager/', views.recipe_manager, name='recipe_manager'),
-
-    path(r'add_tag', views.add_tag, name='add_tag'),
-    path(r'remove_tag', views.remove_tag, name='remove_tag'),
-    path(r'get_tags', views.get_tags, name='get_tags'),
-    path(r'get_recipes', views.get_recipes, name='get_recipes'),
-    path(r'add_tag_to_recipe', views.add_tag_to_recipe, name='add_tag_to_recipe'),
-    path(r'remove_tag_from_recipe', views.add_tag_to_recipe, name='add_tag_to_recipe'),
-    path(r'collect_recipes', views.collect_recipes, name='collect_recipes'),
-
-    path('', views.index, name='index'),
-]
+    path("admin/", admin.site.urls),
+    re_path(r"^recipe/(?P<recipe>\w+)/$", views.recipe, name="recipe"),
+    re_path(r"^(?P<subset>\w+)/$", views.index, name="index_subset"),
+    path("", views.index, name="index"),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
