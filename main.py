@@ -1,54 +1,80 @@
-import win32com.client
-from PyPDF4 import PdfFileReader, PdfFileWriter
-import os
+from __future__ import print_function
+
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+from typing import List
+
+from google.oauth2 import service_account
 
 
-def PPTtoPDF(inputFileName, outputFileName, formatType = 32):
-    powerpoint = win32com.client.DispatchEx("Powerpoint.Application")
-    powerpoint.Visible = 1
+import io
 
-    if outputFileName[-3:] != 'pdf':
-        outputFileName = outputFileName + ".pdf"
-
-    inputFileName = os.path.abspath(inputFileName)
-    outputFileName = os.path.abspath(outputFileName)
-
-    deck = powerpoint.Presentations.Open(inputFileName)
-    deck.SaveAs(outputFileName, formatType) # formatType = 32 for ppt to pdf
-    deck.Close()
-    powerpoint.Quit()
+from googleapiclient.http import MediaIoBaseDownload
 
 
-if __name__ == '__main__':
-    input_path = 'C:\\Users\\brand\\Documents\\Recipe Cards.pptx'
-    output_path = 'output.pdf'
+FOLDERS = "application/vnd.google-apps.folder"
 
-    PPTtoPDF(input_path, output_path)
 
-    pdf = PdfFileReader(output_path)
+class File:
+    def __init__(self, id, name, md5Checksum=None, **kwargs):
+        if kwargs:
+            raise RuntimeError(f"Extra kwargs {kwargs}")
 
-    for page_number in range(pdf.getNumPages()):
-        pdf = PdfFileReader(output_path)
-        page = pdf.getPage(page_number)
+        self.id = id
+        self.name = name
+        self.md5 = md5Checksum
 
-        writer = PdfFileWriter()
-        writer.addPage(page)
-        page_text = page.extractText().split('\n')
+    def __repr__(self):
+        return f"{self.id=}, {self.name=}, {self.md5=}"
 
-        for ingredients_index, text in enumerate(page_text):
-            if ':' in text:
-                break
 
-        else:
-            print(page_text)
+def get_files(service, directory=None, mime_type=None) -> List[File]:
+    params = dict(
+        pageSize=50,
+        fields="files(id, name, md5Checksum)",
+    )
+
+    query_params = []
+    if directory is not None:
+        query_params.append(f"'{directory}' in parents")
+
+    if mime_type is not None:
+        query_params.append(f"mimeType='{mime_type}'")
+
+    if query_params:
+        params["q"] = " & ".join(query_params)
+
+    results = service.files().list(**params).execute()
+
+    ret = []
+    for item in results.get("files", [""]):
+        ret.append(File(**item))
+
+    return ret
+
+
+def main():
+    """Shows basic usage of the Drive v3 API.
+    Prints the names and ids of the first 10 files the user has access to.
+    """
+    creds = service_account.Credentials.from_service_account_file(
+        "recipes.json",
+        scopes=["https://www.googleapis.com/auth/drive.readonly"],
+    )
+
+    service = build("drive", "v3", credentials=creds)
+    for folder in get_files(service=service, mime_type=FOLDERS):
+        if folder.name == "Recipes":
             continue
 
-        title = page_text[:ingredients_index]
+        for recipe in get_files(service=service, directory=folder.id):
+            request = service.files().get_media(fileId=recipe.id)
+            with open(f"{recipe.name}", "wb") as out_file:
+                downloader = MediaIoBaseDownload(out_file, request)
+                done = False
+                while done is False:
+                    _, done = downloader.next_chunk()
 
-        recipe_name = '_'.join(''.join(title).split()).lower().replace('\'', '').replace('&', 'and')
-        print(recipe_name)
 
-        path = os.path.join('recipe_website', 'pages', f'{recipe_name}.pdf')
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, 'wb') as out:
-            writer.write(out)
+if __name__ == "__main__":
+    main()
