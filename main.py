@@ -1,14 +1,11 @@
 from __future__ import print_function
 
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
+import os
+import shutil
 from typing import List
 
 from google.oauth2 import service_account
-
-
-import io
-
+from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 
 
@@ -63,13 +60,16 @@ def main():
     )
 
     service = build("drive", "v3", credentials=creds)
+    shutil.rmtree("pages")
     for folder in get_files(service=service, mime_type=FOLDERS):
         if folder.name == "Recipes":
             continue
 
+        directory = f"pages/{folder.name}"
+        os.makedirs(directory, exist_ok=True)
         for recipe in get_files(service=service, directory=folder.id):
             request = service.files().get_media(fileId=recipe.id)
-            with open(f"{recipe.name}", "wb") as out_file:
+            with open(f"{directory}/{recipe.name}", "wb") as out_file:
                 downloader = MediaIoBaseDownload(out_file, request)
                 done = False
                 while done is False:

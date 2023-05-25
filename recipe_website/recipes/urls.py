@@ -24,6 +24,7 @@ from . import views
 urlpatterns = [
     path("admin/", admin.site.urls),
     re_path(r"^recipe/(?P<recipe>\w+)/$", views.recipe, name="recipe"),
+    path("refresh/", views.refresh_recipes, name="refresh_recipes"),
     re_path(r"^(?P<subset>\w+)/$", views.index, name="index_subset"),
     path("", views.index, name="index"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
