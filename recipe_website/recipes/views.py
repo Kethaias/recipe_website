@@ -121,13 +121,16 @@ def get_files(service, directory=None, mime_type=None) -> List[File]:
 
 
 def refresh_recipes(request):
+    if os.path.exists("pages"):
+        shutil.rmtree("pages")
+
     creds = service_account.Credentials.from_service_account_file(
         "recipes.json",
         scopes=["https://www.googleapis.com/auth/drive.readonly"],
     )
 
     service = build("drive", "v3", credentials=creds)
-    shutil.rmtree("pages")
+
     for folder in get_files(service=service, mime_type=FOLDERS):
         if folder.name == "Recipes":
             continue
